@@ -255,11 +255,11 @@ std::string FriendlyReminders::GetNextMessage(EventType eventType)
 	if (maxIndex == 0) return "";
 
 	// Determine next message index
-	if (cvar_pick_message_method.get()->compare("Random") == 0)
+	if (*cvar_pick_message_method.get() == "Random")
 	{
 		displayMessageIndex = rand() % maxIndex;
 	}
-	else if (cvar_pick_message_method.get()->compare("Indexed") == 0)
+	else if (*cvar_pick_message_method.get() == "Indexed")
 	{
 		if (*messageIndex >= maxIndex)
 		{
@@ -305,7 +305,7 @@ void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 	currentMessageIndex++;
 
 	// Check display method
-	if (cvar_display_message_method.get()->compare("Default") == 0)
+	if (*cvar_display_message_method.get() == "Default")
 	{
 		currentMessage = message;
 
@@ -322,7 +322,7 @@ void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 			displayTime
 		);
 	}
-	else if (cvar_display_message_method.get()->compare("Notification") == 0)
+	else if (*cvar_display_message_method.get() == "Notification")
 	{
 		// Get notifications enabled state
 		bool notificiationsEnabled = cvarManager->getCvar("cl_notifications_enabled_beta").getBoolValue();
