@@ -141,6 +141,8 @@ void FriendlyReminders::HookGoalScored()
 	if (isInGoalReplay) return;
 	// Check goal is not after-match replay
 	if (!isInMatch) return;
+	// Check goal is not replay
+	if (gameWrapper->IsInReplay()) return;
 
 	// Fire goal scored event
 	FriendlyReminders::OnEvent(EventType::GoalScored);
