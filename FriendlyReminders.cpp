@@ -109,8 +109,8 @@ void FriendlyReminders::onLoad()
 	// Register hooks
 	gameWrapper->HookEventPost("Function TAGame.Ball_TA.Explode", std::bind(&FriendlyReminders::HookGoalScored, this));
 
-	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.ReplayPlayback.BeginState", std::bind(&FriendlyReminders::HookReplayBegin, this));
-	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.ReplayPlayback.EndState", std::bind(&FriendlyReminders::HookReplayEnd, this));
+	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.ReplayPlayback.BeginState", std::bind(&FriendlyReminders::HookGoalReplayBegin, this));
+	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.ReplayPlayback.EndState", std::bind(&FriendlyReminders::HookGoalReplayEnd, this));
 
 	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.Countdown.BeginState", std::bind(&FriendlyReminders::HookCountdownBegin, this));
 	gameWrapper->HookEventPost("Function TAGame.GameEvent_Soccar_TA.EventMatchEnded", std::bind(&FriendlyReminders::HookMatchEnded, this));
@@ -137,8 +137,8 @@ void FriendlyReminders::Render(CanvasWrapper canvas)
 // Goal scored hook
 void FriendlyReminders::HookGoalScored()
 {
-	// Check goal is not a replay
-	if (isInReplay) return;
+	// Check goal is not a goal replay
+	if (isInGoalReplay) return;
 	// Check goal is not after-match replay
 	if (!isInMatch) return;
 
@@ -146,23 +146,23 @@ void FriendlyReminders::HookGoalScored()
 	FriendlyReminders::OnEvent(EventType::GoalScored);
 }
 
-// Replay began hook
-void FriendlyReminders::HookReplayBegin()
+// Goal replay began hook
+void FriendlyReminders::HookGoalReplayBegin()
 {
-	// Check replay hasn't already started
-	if (!isInReplay)
+	// Check goal replay hasn't already started
+	if (!isInGoalReplay)
 	{
-		isInReplay = true;
+		isInGoalReplay = true;
 	}
 }
 
-// Replay ended hook
-void FriendlyReminders::HookReplayEnd()
+// Goal replay ended hook
+void FriendlyReminders::HookGoalReplayEnd()
 {
-	// Check replay hasn't already finished
-	if (isInReplay)
+	// Check goal replay hasn't already finished
+	if (isInGoalReplay)
 	{
-		isInReplay = false;
+		isInGoalReplay = false;
 	}
 }
 

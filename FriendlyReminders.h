@@ -55,7 +55,7 @@ private:
 
 	// Plugin flags
 	bool isInMatch = false;
-	bool isInReplay = false;
+	bool isInGoalReplay = false;
 	int goalMessageIndex = 0;
 	int gameFinishedMessageIndex = 0;
 	int combinedMessageIndex = 0;
@@ -67,8 +67,8 @@ private:
 
 	// Hooks
 	void HookGoalScored();
-	void HookReplayBegin();
-	void HookReplayEnd();
+	void HookGoalReplayBegin();
+	void HookGoalReplayEnd();
 	void HookCountdownBegin();
 	void HookMatchEnded();
 	void HookLeaveMatch();
