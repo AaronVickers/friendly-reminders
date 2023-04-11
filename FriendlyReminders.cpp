@@ -1,49 +1,357 @@
 #include "pch.h"
 #include "FriendlyReminders.h"
 
-
-BAKKESMOD_PLUGIN(FriendlyReminders, "write a plugin description here", plugin_version, PLUGINTYPE_FREEPLAY)
+// Initialise plugin
+BAKKESMOD_PLUGIN(FriendlyReminders, "Friendly Reminders", plugin_version, PLUGINTYPE_FREEPLAY)
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 
+// CVar definitions
+const std::string CVAR_SHOW_GOAL_MESSAGES = "show_goal_messages";
+const std::string CVAR_SHOW_GAME_FINISHED_MESSAGES = "show_game_finished_messages";
+
+const std::string CVAR_COMBINE_MESSAGES = "combine_messages";
+
+const std::string CVAR_PICK_MESSAGE_METHOD = "pick_message_method";
+const std::string CVAR_DISPLAY_MESSAGE_METHOD = "display_message_method";
+
+const std::string CVAR_GOAL_MESSAGES = "goal_messages";
+const std::string CVAR_GAME_FINISHED_MESSAGES = "game_finished_messages";
+
+const std::string CVAR_MESSAGE_SCALE = "message_scale";
+const std::string CVAR_MESSAGE_POSITION_X = "message_position_x";
+const std::string CVAR_MESSAGE_POSITION_Y = "message_position_y";
+const std::string CVAR_MESSAGE_ANCHOR_X = "message_anchor_x";
+const std::string CVAR_MESSAGE_ANCHOR_Y = "message_anchor_y";
+
+// Plugin load
 void FriendlyReminders::onLoad()
 {
 	_globalCvarManager = cvarManager;
-	//LOG("Plugin loaded!");
-	// !! Enable debug logging by setting DEBUG_LOG = true in logging.h !!
-	//DEBUGLOG("FriendlyReminders debug mode enabled");
 
-	// LOG and DEBUGLOG use fmt format strings https://fmt.dev/latest/index.html
-	//DEBUGLOG("1 = {}, 2 = {}, pi = {}, false != {}", "one", 2, 3.14, true);
+	// Register CVars
+	cvar_show_goal_messages = std::make_shared<bool>(true);
+	cvar_show_game_finished_messages = std::make_shared<bool>(true);
+	cvar_combine_messages = std::make_shared<bool>(false);
+	cvar_pick_message_method = std::make_shared<std::string>("Random");
+	cvar_display_message_method = std::make_shared<std::string>("Default");
+	cvar_message_scale = std::make_shared<float>(5.0f);
+	cvar_message_position_x = std::make_shared<float>(0.5f);
+	cvar_message_position_y = std::make_shared<float>(0.37f);
+	cvar_message_anchor_x = std::make_shared<float>(0.5f);
+	cvar_message_anchor_y = std::make_shared<float>(0.5f);
 
-	//cvarManager->registerNotifier("my_aweseome_notifier", [&](std::vector<std::string> args) {
-	//	LOG("Hello notifier!");
-	//}, "", 0);
+	// Enabled status (boolean)
+	cvarManager->registerCvar(CVAR_SHOW_GOAL_MESSAGES, "1", "Show messages when a goal is scored", true, true, 0, true, 1, true)
+		.bindTo(cvar_show_goal_messages);
 
-	//auto cvar = cvarManager->registerCvar("template_cvar", "hello-cvar", "just a example of a cvar");
-	//auto cvar2 = cvarManager->registerCvar("template_cvar2", "0", "just a example of a cvar with more settings", true, true, -10, true, 10 );
+	cvarManager->registerCvar(CVAR_SHOW_GAME_FINISHED_MESSAGES, "1", "Show messages when a game is finished", true, true, 0, true, 1, true)
+		.bindTo(cvar_show_game_finished_messages);
 
-	//cvar.addOnValueChanged([this](std::string cvarName, CVarWrapper newCvar) {
-	//	LOG("the cvar with name: {} changed", cvarName);
-	//	LOG("the new value is: {}", newCvar.getStringValue());
-	//});
+	// Combine message lists (boolean)
+	cvarManager->registerCvar(CVAR_COMBINE_MESSAGES, "0", "Use both lists of messages for both message events", true, true, 0, true, 1, true)
+		.bindTo(cvar_combine_messages);
 
-	//cvar2.addOnValueChanged(std::bind(&FriendlyReminders::YourPluginMethod, this, _1, _2));
+	// Message picking method (Random, Indexed)
+	cvarManager->registerCvar(CVAR_PICK_MESSAGE_METHOD, "Random", "Method for how messages should be picked from the lists", false, false, 0, false, 0, true)
+		.bindTo(cvar_pick_message_method);
 
-	// enabled decleared in the header
-	//enabled = std::make_shared<bool>(false);
-	//cvarManager->registerCvar("TEMPLATE_Enabled", "0", "Enable the TEMPLATE plugin", true, true, 0, true, 1).bindTo(enabled);
+	// Message display method (Default, Notification)
+	cvarManager->registerCvar(CVAR_DISPLAY_MESSAGE_METHOD, "Default", "Method for how messages will be displayed on the screen", false, false, 0, false, 0, true)
+		.bindTo(cvar_display_message_method);
 
-	//cvarManager->registerNotifier("NOTIFIER", [this](std::vector<std::string> params){FUNCTION();}, "DESCRIPTION", PERMISSION_ALL);
-	//cvarManager->registerCvar("CVAR", "DEFAULTVALUE", "DESCRIPTION", true, true, MINVAL, true, MAXVAL);//.bindTo(CVARVARIABLE);
-	//gameWrapper->HookEvent("FUNCTIONNAME", std::bind(&TEMPLATE::FUNCTION, this));
-	//gameWrapper->HookEventWithCallerPost<ActorWrapper>("FUNCTIONNAME", std::bind(&FriendlyReminders::FUNCTION, this, _1, _2, _3));
-	//gameWrapper->RegisterDrawable(bind(&TEMPLATE::Render, this, std::placeholders::_1));
+	// Text scale of the message
+	cvarManager->registerCvar(CVAR_MESSAGE_SCALE, "5", "Text scale of the message", true, true, 0, true, 10, true)
+		.bindTo(cvar_message_scale);
 
+	// X position of the message
+	cvarManager->registerCvar(CVAR_MESSAGE_POSITION_X, "0.5", "X (horizontal) position of the message", true, true, 0, true, 1, true)
+		.bindTo(cvar_message_position_x);
 
-	//gameWrapper->HookEvent("Function TAGame.Ball_TA.Explode", [this](std::string eventName) {
-	//	LOG("Your hook got called and the ball went POOF");
-	//});
-	// You could also use std::bind here
-	//gameWrapper->HookEvent("Function TAGame.Ball_TA.Explode", std::bind(&FriendlyReminders::YourPluginMethod, this);
+	// Y position of the message
+	cvarManager->registerCvar(CVAR_MESSAGE_POSITION_Y, "0.37", "Y (vertical) position of the message", true, true, 0, true, 1, true)
+		.bindTo(cvar_message_position_y);
+
+	// X anchor point of the message
+	cvarManager->registerCvar(CVAR_MESSAGE_ANCHOR_X, "0.5", "X (horizontal) anchor point of the message", true, true, 0, true, 1, true)
+		.bindTo(cvar_message_anchor_x);
+
+	// Y anchor point of the message
+	cvarManager->registerCvar(CVAR_MESSAGE_ANCHOR_Y, "0.5", "Y (vertical) anchor point of the message", true, true, 0, true, 1, true)
+		.bindTo(cvar_message_anchor_y);
+
+	// Comma separated messages
+	cvarManager->registerCvar(CVAR_GOAL_MESSAGES, "Drink some water!,Check your posture!", "Comma separated messages to be displayed when a goal is scored", true, false, 0, false, 0, true)
+		.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar)
+			{
+				std::string messages = cvar.getStringValue();
+
+				goalMessages.clear();
+
+				FriendlyReminders::SplitString(messages, ',', goalMessages);
+			}
+	);
+
+	cvarManager->registerCvar(CVAR_GAME_FINISHED_MESSAGES, "Do some push-ups!,Do some sit-ups!", "Comma separated messages to be displayed when a game is finished", true, false, 0, false, 0, true)
+		.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar)
+			{
+				std::string messages = cvar.getStringValue();
+
+				gameFinishedMessages.clear();
+
+				FriendlyReminders::SplitString(messages, ',', gameFinishedMessages);
+			}
+	);
+
+	// Register rendering
+	gameWrapper->RegisterDrawable(std::bind(&FriendlyReminders::Render, this, std::placeholders::_1));
+
+	// Register hooks
+	gameWrapper->HookEventPost("Function TAGame.Ball_TA.Explode", std::bind(&FriendlyReminders::HookGoalScored, this));
+
+	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.ReplayPlayback.BeginState", std::bind(&FriendlyReminders::HookReplayBegin, this));
+	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.ReplayPlayback.EndState", std::bind(&FriendlyReminders::HookReplayEnd, this));
+
+	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.Countdown.BeginState", std::bind(&FriendlyReminders::HookCountdownBegin, this));
+	gameWrapper->HookEventPost("Function TAGame.GameEvent_Soccar_TA.EventMatchEnded", std::bind(&FriendlyReminders::HookMatchEnded, this));
+
+	gameWrapper->HookEventPost("Function TAGame.GFxShell_TA.LeaveMatch", std::bind(&FriendlyReminders::HookLeaveMatch, this));
+}
+
+// Canvas rendering
+void FriendlyReminders::Render(CanvasWrapper canvas)
+{
+	Vector2 canvasSize = canvas.GetSize();
+
+	float textScale = *cvar_message_scale * canvasSize.Y / 1080;
+
+	Vector2F textPosition = { *cvar_message_position_x, *cvar_message_position_y };
+	Vector2F textSize = canvas.GetStringSize(currentMessage, textScale, textScale);
+	Vector2F anchorOffset = textSize * Vector2F{ *cvar_message_anchor_x, *cvar_message_anchor_y };
+
+	canvas.SetColor(LinearColor{ 255, 255, 255, 255 });
+	canvas.SetPosition(textPosition * canvasSize - anchorOffset);
+	canvas.DrawString(currentMessage, textScale, textScale, true, false);
+}
+
+// Goal scored hook
+void FriendlyReminders::HookGoalScored()
+{
+	// Check goal is not a replay
+	if (isInReplay) return;
+	// Check goal is not after-match replay
+	if (!isInMatch) return;
+
+	// Fire goal scored event
+	FriendlyReminders::OnEvent(EventType::GoalScored);
+}
+
+// Replay began hook
+void FriendlyReminders::HookReplayBegin()
+{
+	// Check replay hasn't already started
+	if (!isInReplay)
+	{
+		isInReplay = true;
+	}
+}
+
+// Replay ended hook
+void FriendlyReminders::HookReplayEnd()
+{
+	// Check replay hasn't already finished
+	if (isInReplay)
+	{
+		isInReplay = false;
+	}
+}
+
+// Countdown began hook
+void FriendlyReminders::HookCountdownBegin()
+{
+	// Check match hasn't already started
+	if (!isInMatch)
+	{
+		isInMatch = true;
+	}
+}
+
+// Match ended hook
+void FriendlyReminders::HookMatchEnded()
+{
+	// Check match hasn't already finished
+	if (isInMatch)
+	{
+		isInMatch = false;
+
+		// Fire match ended event
+		FriendlyReminders::OnEvent(EventType::GameFinished);
+	}
+}
+
+// Leave match hook
+void FriendlyReminders::HookLeaveMatch()
+{
+	// Check match hasn't already finished
+	if (isInMatch)
+	{
+		isInMatch = false;
+
+		// Fire match ended event
+		FriendlyReminders::OnEvent(EventType::GameFinished);
+	}
+}
+
+// Method to handle message events
+void FriendlyReminders::OnEvent(EventType eventType)
+{
+	// Check event happened in online game
+	if (!gameWrapper->IsInOnlineGame()) return;
+
+	// Return if event type is disabled
+	if (eventType == EventType::GoalScored && *cvar_show_goal_messages.get() == false) return;
+	if (eventType == EventType::GameFinished && *cvar_show_game_finished_messages.get() == false) return;
+
+	// Get next message for even type
+	std::string message = FriendlyReminders::GetNextMessage(eventType);
+
+	// Display message
+	FriendlyReminders::DisplayMessage(message, 4);
+}
+
+// Method to get message for event type
+std::string FriendlyReminders::GetNextMessage(EventType eventType)
+{
+	size_t goalMessagesLength = goalMessages.size();
+	size_t gameFinishedMessagesLength = gameFinishedMessages.size();
+	size_t maxIndex = 0;
+	int* messageIndex = 0;
+	int displayMessageIndex = 0;
+
+	// Calculate maximum message index
+	if (*cvar_combine_messages.get() == true)
+	{
+		maxIndex = goalMessagesLength + gameFinishedMessagesLength;
+
+		messageIndex = &combinedMessageIndex;
+	}
+	else
+	{
+		if (eventType == EventType::GoalScored)
+		{
+			maxIndex = goalMessagesLength;
+
+			messageIndex = &goalMessageIndex;
+		}
+		else if (eventType == EventType::GameFinished)
+		{
+			maxIndex = gameFinishedMessagesLength;
+
+			messageIndex = &gameFinishedMessageIndex;
+		}
+	}
+
+	// Make sure there is a message
+	if (maxIndex == 0) return "";
+
+	// Determine next message index
+	if (cvar_pick_message_method.get()->compare("Random") == 0)
+	{
+		displayMessageIndex = rand() % maxIndex;
+	}
+	else if (cvar_pick_message_method.get()->compare("Indexed") == 0)
+	{
+		if (*messageIndex >= maxIndex)
+		{
+			*messageIndex = 0;
+		}
+
+		displayMessageIndex = *messageIndex;
+
+		(*messageIndex)++;
+	}
+
+	// Get message at message index
+	if (*cvar_combine_messages.get() == true)
+	{
+		if (displayMessageIndex < goalMessagesLength)
+		{
+			return goalMessages.at(displayMessageIndex);
+		}
+		else
+		{
+			return gameFinishedMessages.at(displayMessageIndex - goalMessagesLength);
+		}
+	}
+	else
+	{
+		if (eventType == EventType::GoalScored)
+		{
+			return goalMessages.at(displayMessageIndex);
+		}
+		else if (eventType == EventType::GameFinished)
+		{
+			return gameFinishedMessages.at(displayMessageIndex);
+		}
+	}
+
+	// No message
+	return "";
+}
+
+// Method to display message to user
+void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
+{
+	currentMessageIndex++;
+
+	// Check display method
+	if (cvar_display_message_method.get()->compare("Default") == 0)
+	{
+		currentMessage = message;
+
+		int thisMessageIndex = currentMessageIndex;
+
+		// Clear message if it hasn't changed
+		gameWrapper->SetTimeout(
+			[this, thisMessageIndex](GameWrapper* gameWrapper)
+			{
+				if (currentMessageIndex != thisMessageIndex) return;
+
+				currentMessage = "";
+			},
+			displayTime
+		);
+	}
+	else if (cvar_display_message_method.get()->compare("Notification") == 0)
+	{
+		// Get notifications enabled state
+		bool notificiationsEnabled = cvarManager->getCvar("cl_notifications_enabled_beta").getBoolValue();
+
+		// Enable notifications if currently disabled
+		if (!notificiationsEnabled)
+		{
+			cvarManager->executeCommand("cl_notifications_enabled_beta 1");
+		}
+
+		// Display notification
+		gameWrapper->Toast("Friendly Reminder", message, "default", displayTime);
+
+		// Restore notifications enabled state
+		if (!notificiationsEnabled)
+		{
+			cvarManager->executeCommand("cl_notifications_enabled_beta 0");
+		}
+	}
+}
+
+// String split method
+void FriendlyReminders::SplitString(std::string& str, char delim, std::vector<std::string>& resultVector)
+{
+	std::istringstream iss(str);
+	std::string subStr;
+
+	while (std::getline(iss, subStr, delim))
+	{
+		resultVector.emplace_back(subStr);
+	}
 }
