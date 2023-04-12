@@ -137,12 +137,41 @@ void FriendlyReminders::Render(CanvasWrapper canvas)
 // Goal scored hook
 void FriendlyReminders::HookGoalScored()
 {
-	// Check goal is not a goal replay
+	// Ignore if in goal replay
 	if (isInGoalReplay) return;
-	// Check goal is not after-match replay
+
+	// Ignore if after match replay
 	if (!isInMatch) return;
-	// Check goal is not replay
+
+	// Ignore if in custom training
+	if (gameWrapper->IsInCustomTraining()) return;
+
+	// Ignore if in freeplay
+	if (gameWrapper->IsInFreeplay()) return;
+
+	// Ignore if not in game
+	if (!gameWrapper->IsInGame()) return;
+
+	// Ignore if in replay
 	if (gameWrapper->IsInReplay()) return;
+
+	// Ignore if spectating
+	if (PlayerControllerWrapper pc = gameWrapper->GetPlayerController())
+	{
+		if (PriWrapper pri = pc.GetPRI())
+		{
+			if (pri.IsSpectator()) return;
+		}
+	}
+
+	// Ignore if in tutorial
+	if (ServerWrapper sw = gameWrapper->GetCurrentGameState())
+	{
+		if (GameSettingPlaylistWrapper playlist = sw.GetPlaylist())
+		{
+			if (playlist.GetPlaylistId() == 9) return;
+		}
+	}
 
 	// Fire goal scored event
 	FriendlyReminders::OnEvent(EventType::GoalScored);
@@ -194,9 +223,6 @@ void FriendlyReminders::HookMatchEnded()
 // Method to handle message events
 void FriendlyReminders::OnEvent(EventType eventType)
 {
-	// Check event happened in online game
-	if (!gameWrapper->IsInOnlineGame()) return;
-
 	// Return if event type is disabled
 	if (eventType == EventType::GoalScored && *cvar_show_goal_messages.get() == false) return;
 	if (eventType == EventType::GameFinished && *cvar_show_game_finished_messages.get() == false) return;
