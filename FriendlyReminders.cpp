@@ -107,7 +107,7 @@ void FriendlyReminders::onLoad()
 	gameWrapper->RegisterDrawable(std::bind(&FriendlyReminders::Render, this, std::placeholders::_1));
 
 	// Register hooks
-	gameWrapper->HookEventPost("Function TAGame.Ball_TA.Explode", std::bind(&FriendlyReminders::HookGoalScored, this));
+	gameWrapper->HookEventPost("Function TAGame.Ball_TA.OnHitGoal", std::bind(&FriendlyReminders::HookGoalScored, this));
 
 	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.ReplayPlayback.BeginState", std::bind(&FriendlyReminders::HookGoalReplayBegin, this));
 	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.ReplayPlayback.EndState", std::bind(&FriendlyReminders::HookGoalReplayEnd, this));
