@@ -115,7 +115,7 @@ void FriendlyReminders::onLoad()
 	gameWrapper->HookEventPost("Function GameEvent_Soccar_TA.Countdown.BeginState", std::bind(&FriendlyReminders::HookCountdownBegin, this));
 	gameWrapper->HookEventPost("Function TAGame.GameEvent_Soccar_TA.EventMatchEnded", std::bind(&FriendlyReminders::HookMatchEnded, this));
 
-	gameWrapper->HookEventPost("Function TAGame.GFxShell_TA.LeaveMatch", std::bind(&FriendlyReminders::HookLeaveMatch, this));
+	gameWrapper->HookEventPost("Function TAGame.GFxShell_TA.LeaveMatch", std::bind(&FriendlyReminders::HookMatchEnded, this));
 }
 
 // Canvas rendering
@@ -180,19 +180,6 @@ void FriendlyReminders::HookCountdownBegin()
 
 // Match ended hook
 void FriendlyReminders::HookMatchEnded()
-{
-	// Check match hasn't already finished
-	if (isInMatch)
-	{
-		isInMatch = false;
-
-		// Fire match ended event
-		FriendlyReminders::OnEvent(EventType::GameFinished);
-	}
-}
-
-// Leave match hook
-void FriendlyReminders::HookLeaveMatch()
 {
 	// Check match hasn't already finished
 	if (isInMatch)
