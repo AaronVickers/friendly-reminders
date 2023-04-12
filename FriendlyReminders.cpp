@@ -90,7 +90,7 @@ void FriendlyReminders::onLoad()
 
 				FriendlyReminders::SplitString(messages, ',', goalMessages);
 			}
-	);
+		);
 
 	cvarManager->registerCvar(CVAR_GAME_FINISHED_MESSAGES, "Do some push-ups!,Do some sit-ups!", "Comma separated messages to be displayed when a game is finished", true, false, 0, false, 0, true)
 		.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar)
@@ -101,7 +101,7 @@ void FriendlyReminders::onLoad()
 
 				FriendlyReminders::SplitString(messages, ',', gameFinishedMessages);
 			}
-	);
+		);
 
 	// Register rendering
 	gameWrapper->RegisterDrawable(std::bind(&FriendlyReminders::Render, this, std::placeholders::_1));
@@ -343,6 +343,10 @@ void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 		{
 			cvarManager->executeCommand("cl_notifications_enabled_beta 0");
 		}
+	}
+	else if (*cvar_display_message_method.get() == "Chat")
+	{
+		gameWrapper->LogToChatbox(message, "Friendly Reminder");
 	}
 }
 
