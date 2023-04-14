@@ -118,6 +118,12 @@ void FriendlyReminders::onLoad()
 	gameWrapper->HookEventPost("Function TAGame.GFxShell_TA.LeaveMatch", std::bind(&FriendlyReminders::HookMatchEnded, this));
 }
 
+// Plugin unload
+void FriendlyReminders::onUnload()
+{
+	gameWrapper->UnregisterDrawables();
+}
+
 // Canvas rendering
 void FriendlyReminders::Render(CanvasWrapper canvas)
 {

@@ -35,6 +35,7 @@ class FriendlyReminders: public BakkesMod::Plugin::BakkesModPlugin
 {
 	// BakkesModPlugin methods
 	virtual void onLoad();
+	virtual void onUnload();
 
 private:
 	// CVars
