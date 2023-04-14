@@ -109,8 +109,8 @@ void FriendlyReminders::onLoad()
 			}
 		);
 
-	// Register rendering
-	gameWrapper->RegisterDrawable(std::bind(&FriendlyReminders::Render, this, std::placeholders::_1));
+	// Register canvas rendering
+	gameWrapper->RegisterDrawable(std::bind(&FriendlyReminders::RenderCanvas, this, std::placeholders::_1));
 
 	// Register hooks
 	gameWrapper->HookEventPost("Function TAGame.Ball_TA.OnHitGoal", std::bind(&FriendlyReminders::HookGoalScored, this));
@@ -130,8 +130,8 @@ void FriendlyReminders::onUnload()
 	gameWrapper->UnregisterDrawables();
 }
 
-// Canvas rendering
-void FriendlyReminders::Render(CanvasWrapper canvas)
+// Canvas interface rendering
+void FriendlyReminders::RenderCanvas(CanvasWrapper canvas)
 {
 	Vector2 canvasSize = canvas.GetSize();
 

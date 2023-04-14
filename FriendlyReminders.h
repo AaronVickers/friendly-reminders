@@ -63,8 +63,8 @@ private:
 	std::string currentMessage = "";
 	int currentMessageIndex = 0;
 
-	// Interface rendering
-	void Render(CanvasWrapper);
+	// Canvas interface rendering
+	void RenderCanvas(CanvasWrapper);
 
 	// Hooks
 	void HookGoalScored();
