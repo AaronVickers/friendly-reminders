@@ -41,10 +41,11 @@ void FriendlyReminders::onLoad()
 	message_anchor_x = std::make_shared<float>(0.5f);
 	message_anchor_y = std::make_shared<float>(0.5f);
 
-	// Enabled status (boolean)
+	// Enabled on goal status (boolean)
 	cvarManager->registerCvar(CVAR_SHOW_GOAL_MESSAGES, "1", "Show messages when a goal is scored", true, true, 0, true, 1, true)
 		.bindTo(show_goal_messages);
 
+	// Enabled on game end status (boolean)
 	cvarManager->registerCvar(CVAR_SHOW_GAME_FINISHED_MESSAGES, "1", "Show messages when a game is finished", true, true, 0, true, 1, true)
 		.bindTo(show_game_finished_messages);
 
@@ -56,7 +57,7 @@ void FriendlyReminders::onLoad()
 	cvarManager->registerCvar(CVAR_PICK_MESSAGE_METHOD, "Random", "Method for how messages should be picked from the lists", false, false, 0, false, 0, true)
 		.bindTo(pick_message_method);
 
-	// Message display method (Default, Notification)
+	// Message display method (Default, Notification, Chat)
 	CVarWrapper cvar_display_message_method = cvarManager->registerCvar(CVAR_DISPLAY_MESSAGE_METHOD, "Default", "Method for how messages will be displayed on the screen", false, false, 0, false, 0, true);
 	cvar_display_message_method.bindTo(display_message_method);
 	cvar_display_message_method.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(false); });
@@ -86,7 +87,7 @@ void FriendlyReminders::onLoad()
 	cvar_message_anchor_y.bindTo(message_anchor_y);
 	cvar_message_anchor_y.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(true); });
 
-	// Comma separated messages
+	// Goal messages (comma separated string)
 	cvarManager->registerCvar(CVAR_GOAL_MESSAGES, "Drink some water!,Check your posture!", "Comma separated messages to be displayed when a goal is scored", true, false, 0, false, 0, true)
 		.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar)
 			{
@@ -98,6 +99,7 @@ void FriendlyReminders::onLoad()
 			}
 		);
 
+	// Game finished messages (comma separated string)
 	cvarManager->registerCvar(CVAR_GAME_FINISHED_MESSAGES, "Do some push-ups!,Do some sit-ups!", "Comma separated messages to be displayed when a game is finished", true, false, 0, false, 0, true)
 		.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar)
 			{
