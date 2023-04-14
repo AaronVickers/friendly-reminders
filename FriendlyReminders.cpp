@@ -57,10 +57,15 @@ void FriendlyReminders::onLoad()
 	cvarManager->registerCvar(CVAR_PICK_MESSAGE_METHOD, "Random", "Method for how messages should be picked from the lists", false, false, 0, false, 0, true)
 		.bindTo(pick_message_method);
 
-	// Message display method (Default, Notification, Chat)
+	// Message display method (Default, Notification, Chat, Legacy)
 	CVarWrapper cvar_display_message_method = cvarManager->registerCvar(CVAR_DISPLAY_MESSAGE_METHOD, "Default", "Method for how messages will be displayed on the screen", false, false, 0, false, 0, true);
 	cvar_display_message_method.bindTo(display_message_method);
-	cvar_display_message_method.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(false); });
+	cvar_display_message_method.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar)
+		{
+			DisplayExampleMessage(false);
+			UpdateDisplayMethod();
+		}
+	);
 
 	// Text scale of the message
 	CVarWrapper cvar_message_scale = cvarManager->registerCvar(CVAR_MESSAGE_SCALE, "5", "Text scale of the message", true, true, 0, true, 10, true);
@@ -111,9 +116,6 @@ void FriendlyReminders::onLoad()
 			}
 		);
 
-	// Register canvas rendering
-	gameWrapper->RegisterDrawable(std::bind(&FriendlyReminders::RenderCanvas, this, std::placeholders::_1));
-
 	// Register hooks
 	gameWrapper->HookEventPost("Function TAGame.Ball_TA.OnHitGoal", std::bind(&FriendlyReminders::HookGoalScored, this));
 
@@ -124,12 +126,22 @@ void FriendlyReminders::onLoad()
 	gameWrapper->HookEventPost("Function TAGame.GameEvent_Soccar_TA.EventMatchEnded", std::bind(&FriendlyReminders::HookMatchEnded, this));
 
 	gameWrapper->HookEventPost("Function TAGame.GFxShell_TA.LeaveMatch", std::bind(&FriendlyReminders::HookMatchEnded, this));
+
+	// Render display on game load
+	gameWrapper->SetTimeout([this](...)
+		{
+			UpdateDisplayMethod();
+			pluginLoaded = true;
+		},
+		1.0f
+	);
 }
 
 // Plugin unload
 void FriendlyReminders::onUnload()
 {
 	gameWrapper->UnregisterDrawables();
+	cvarManager->executeCommand("closemenu " + GetMenuName(), false);
 }
 
 // Canvas interface rendering
@@ -234,6 +246,23 @@ void FriendlyReminders::HookMatchEnded()
 	}
 }
 
+void FriendlyReminders::UpdateDisplayMethod()
+{
+	gameWrapper->UnregisterDrawables();
+	cvarManager->executeCommand("closemenu " + GetMenuName(), false);
+
+	if (*display_message_method.get() == "Default")
+	{
+		// Register canvas rendering
+		gameWrapper->RegisterDrawable(std::bind(&FriendlyReminders::RenderCanvas, this, std::placeholders::_1));
+	}
+	else if (*display_message_method.get() == "NewDefault")
+	{
+		// Open ImGui interface
+		cvarManager->executeCommand("openmenu " + GetMenuName(), false);
+	}
+}
+
 // Method to handle message events
 void FriendlyReminders::OnEvent(EventType eventType)
 {
@@ -331,7 +360,7 @@ std::string FriendlyReminders::GetNextMessage(EventType eventType)
 // Method to display example message to user
 void FriendlyReminders::DisplayExampleMessage(bool visualChangeMade)
 {
-	if (!visualChangeMade || *display_message_method.get() == "Default")
+	if (!visualChangeMade || *display_message_method.get() == "Default" || *display_message_method.get() == "NewDefault")
 	{
 		std::string editMessage = "Example text!";
 		DisplayMessage(editMessage, 1);
@@ -341,10 +370,14 @@ void FriendlyReminders::DisplayExampleMessage(bool visualChangeMade)
 // Method to display message to user
 void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 {
+	if (!pluginLoaded) {
+		return;
+	}
+
 	currentMessageIndex++;
 
 	// Check display method
-	if (*display_message_method.get() == "Default")
+	if (*display_message_method.get() == "Default" || *display_message_method.get() == "NewDefault")
 	{
 		currentMessage = message;
 
