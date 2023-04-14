@@ -14,6 +14,7 @@ const std::string CVAR_COMBINE_MESSAGES = "combine_messages";
 
 const std::string CVAR_PICK_MESSAGE_METHOD = "pick_message_method";
 const std::string CVAR_DISPLAY_MESSAGE_METHOD = "display_message_method";
+const std::string CVAR_DISPLAY_METHOD_CONFIGURABLE = "display_method_configurable";
 
 const std::string CVAR_GOAL_MESSAGES = "goal_messages";
 const std::string CVAR_GAME_FINISHED_MESSAGES = "game_finished_messages";
@@ -66,6 +67,9 @@ void FriendlyReminders::onLoad()
 			UpdateDisplayMethod();
 		}
 	);
+
+	// Message display method configurable
+	cvarManager->registerCvar(CVAR_DISPLAY_METHOD_CONFIGURABLE, "1", "Whether or not selected display method is configurable", false, false, 0, false, 0, false);
 
 	// Text scale of the message
 	CVarWrapper cvar_message_scale = cvarManager->registerCvar(CVAR_MESSAGE_SCALE, "5", "Text scale of the message", true, true, 0, true, 10, true);
@@ -255,11 +259,19 @@ void FriendlyReminders::UpdateDisplayMethod()
 	{
 		// Register canvas rendering
 		gameWrapper->RegisterDrawable(std::bind(&FriendlyReminders::RenderCanvas, this, std::placeholders::_1));
+
+		cvarManager->getCvar(CVAR_DISPLAY_METHOD_CONFIGURABLE).setValue(true);
 	}
 	else if (*display_message_method.get() == "NewDefault")
 	{
 		// Open ImGui interface
 		cvarManager->executeCommand("openmenu " + GetMenuName(), false);
+
+		cvarManager->getCvar(CVAR_DISPLAY_METHOD_CONFIGURABLE).setValue(true);
+	}
+	else
+	{
+		cvarManager->getCvar(CVAR_DISPLAY_METHOD_CONFIGURABLE).setValue(false);
 	}
 }
 

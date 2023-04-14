@@ -14,6 +14,7 @@ extern const std::string CVAR_COMBINE_MESSAGES;
 
 extern const std::string CVAR_PICK_MESSAGE_METHOD;
 extern const std::string CVAR_DISPLAY_MESSAGE_METHOD;
+extern const std::string CVAR_DISPLAY_METHOD_CONFIGURABLE;
 
 extern const std::string CVAR_GOAL_MESSAGES;
 extern const std::string CVAR_GAME_FINISHED_MESSAGES;
