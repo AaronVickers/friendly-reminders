@@ -402,7 +402,7 @@ void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 		// Enable notifications if currently disabled
 		if (!notificiationsEnabled)
 		{
-			cvarManager->executeCommand("cl_notifications_enabled_beta 1");
+			cvarManager->executeCommand("cl_notifications_enabled_beta 1", false);
 		}
 
 		// Display notification
@@ -411,7 +411,7 @@ void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 		// Restore notifications enabled state
 		if (!notificiationsEnabled)
 		{
-			cvarManager->executeCommand("cl_notifications_enabled_beta 0");
+			cvarManager->executeCommand("cl_notifications_enabled_beta 0", false);
 		}
 	}
 	else if (*display_message_method.get() == "Chat")
