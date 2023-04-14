@@ -39,16 +39,16 @@ class FriendlyReminders: public BakkesMod::Plugin::BakkesModPlugin
 
 private:
 	// CVars
-	std::shared_ptr<bool> cvar_show_goal_messages;
-	std::shared_ptr<bool> cvar_show_game_finished_messages;
-	std::shared_ptr<bool> cvar_combine_messages;
-	std::shared_ptr<std::string> cvar_pick_message_method;
-	std::shared_ptr<std::string> cvar_display_message_method;
-	std::shared_ptr<float> cvar_message_scale;
-	std::shared_ptr<float> cvar_message_position_x;
-	std::shared_ptr<float> cvar_message_position_y;
-	std::shared_ptr<float> cvar_message_anchor_x;
-	std::shared_ptr<float> cvar_message_anchor_y;
+	std::shared_ptr<bool> show_goal_messages;
+	std::shared_ptr<bool> show_game_finished_messages;
+	std::shared_ptr<bool> combine_messages;
+	std::shared_ptr<std::string> pick_message_method;
+	std::shared_ptr<std::string> display_message_method;
+	std::shared_ptr<float> message_scale;
+	std::shared_ptr<float> message_position_x;
+	std::shared_ptr<float> message_position_y;
+	std::shared_ptr<float> message_anchor_x;
+	std::shared_ptr<float> message_anchor_y;
 
 	// CVar post-process results
 	std::vector<std::string> goalMessages = { "Drink some water!", "Check your posture!" };
@@ -77,6 +77,7 @@ private:
 	// Plugin methods
 	void OnEvent(EventType);
 	std::string GetNextMessage(EventType);
+	void DisplayExampleMessage(bool);
 	void DisplayMessage(std::string&, float);
 
 	// Utility methods

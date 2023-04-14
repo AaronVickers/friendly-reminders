@@ -30,55 +30,61 @@ void FriendlyReminders::onLoad()
 	_globalCvarManager = cvarManager;
 
 	// Register CVars
-	cvar_show_goal_messages = std::make_shared<bool>(true);
-	cvar_show_game_finished_messages = std::make_shared<bool>(true);
-	cvar_combine_messages = std::make_shared<bool>(false);
-	cvar_pick_message_method = std::make_shared<std::string>("Random");
-	cvar_display_message_method = std::make_shared<std::string>("Default");
-	cvar_message_scale = std::make_shared<float>(5.0f);
-	cvar_message_position_x = std::make_shared<float>(0.5f);
-	cvar_message_position_y = std::make_shared<float>(0.37f);
-	cvar_message_anchor_x = std::make_shared<float>(0.5f);
-	cvar_message_anchor_y = std::make_shared<float>(0.5f);
+	show_goal_messages = std::make_shared<bool>(true);
+	show_game_finished_messages = std::make_shared<bool>(true);
+	combine_messages = std::make_shared<bool>(false);
+	pick_message_method = std::make_shared<std::string>("Random");
+	display_message_method = std::make_shared<std::string>("Default");
+	message_scale = std::make_shared<float>(5.0f);
+	message_position_x = std::make_shared<float>(0.5f);
+	message_position_y = std::make_shared<float>(0.37f);
+	message_anchor_x = std::make_shared<float>(0.5f);
+	message_anchor_y = std::make_shared<float>(0.5f);
 
 	// Enabled status (boolean)
 	cvarManager->registerCvar(CVAR_SHOW_GOAL_MESSAGES, "1", "Show messages when a goal is scored", true, true, 0, true, 1, true)
-		.bindTo(cvar_show_goal_messages);
+		.bindTo(show_goal_messages);
 
 	cvarManager->registerCvar(CVAR_SHOW_GAME_FINISHED_MESSAGES, "1", "Show messages when a game is finished", true, true, 0, true, 1, true)
-		.bindTo(cvar_show_game_finished_messages);
+		.bindTo(show_game_finished_messages);
 
 	// Combine message lists (boolean)
 	cvarManager->registerCvar(CVAR_COMBINE_MESSAGES, "0", "Use both lists of messages for both message events", true, true, 0, true, 1, true)
-		.bindTo(cvar_combine_messages);
+		.bindTo(combine_messages);
 
 	// Message picking method (Random, Indexed)
 	cvarManager->registerCvar(CVAR_PICK_MESSAGE_METHOD, "Random", "Method for how messages should be picked from the lists", false, false, 0, false, 0, true)
-		.bindTo(cvar_pick_message_method);
+		.bindTo(pick_message_method);
 
 	// Message display method (Default, Notification)
-	cvarManager->registerCvar(CVAR_DISPLAY_MESSAGE_METHOD, "Default", "Method for how messages will be displayed on the screen", false, false, 0, false, 0, true)
-		.bindTo(cvar_display_message_method);
+	CVarWrapper cvar_display_message_method = cvarManager->registerCvar(CVAR_DISPLAY_MESSAGE_METHOD, "Default", "Method for how messages will be displayed on the screen", false, false, 0, false, 0, true);
+	cvar_display_message_method.bindTo(display_message_method);
+	cvar_display_message_method.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(false); });
 
 	// Text scale of the message
-	cvarManager->registerCvar(CVAR_MESSAGE_SCALE, "5", "Text scale of the message", true, true, 0, true, 10, true)
-		.bindTo(cvar_message_scale);
+	CVarWrapper cvar_message_scale = cvarManager->registerCvar(CVAR_MESSAGE_SCALE, "5", "Text scale of the message", true, true, 0, true, 10, true);
+	cvar_message_scale.bindTo(message_scale);
+	cvar_message_scale.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(true); });
 
 	// X position of the message
-	cvarManager->registerCvar(CVAR_MESSAGE_POSITION_X, "0.5", "X (horizontal) position of the message", true, true, 0, true, 1, true)
-		.bindTo(cvar_message_position_x);
+	CVarWrapper cvar_message_position_x = cvarManager->registerCvar(CVAR_MESSAGE_POSITION_X, "0.5", "X (horizontal) position of the message", true, true, 0, true, 1, true);
+	cvar_message_position_x.bindTo(message_position_x);
+	cvar_message_position_x.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(true); });
 
 	// Y position of the message
-	cvarManager->registerCvar(CVAR_MESSAGE_POSITION_Y, "0.37", "Y (vertical) position of the message", true, true, 0, true, 1, true)
-		.bindTo(cvar_message_position_y);
+	CVarWrapper cvar_message_position_y = cvarManager->registerCvar(CVAR_MESSAGE_POSITION_Y, "0.37", "Y (vertical) position of the message", true, true, 0, true, 1, true);
+	cvar_message_position_y.bindTo(message_position_y);
+	cvar_message_position_y.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(true); });
 
 	// X anchor point of the message
-	cvarManager->registerCvar(CVAR_MESSAGE_ANCHOR_X, "0.5", "X (horizontal) anchor point of the message", true, true, 0, true, 1, true)
-		.bindTo(cvar_message_anchor_x);
+	CVarWrapper cvar_message_anchor_x = cvarManager->registerCvar(CVAR_MESSAGE_ANCHOR_X, "0.5", "X (horizontal) anchor point of the message", true, true, 0, true, 1, true);
+	cvar_message_anchor_x.bindTo(message_anchor_x);
+	cvar_message_anchor_x.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(true); });
 
 	// Y anchor point of the message
-	cvarManager->registerCvar(CVAR_MESSAGE_ANCHOR_Y, "0.5", "Y (vertical) anchor point of the message", true, true, 0, true, 1, true)
-		.bindTo(cvar_message_anchor_y);
+	CVarWrapper cvar_message_anchor_y = cvarManager->registerCvar(CVAR_MESSAGE_ANCHOR_Y, "0.5", "Y (vertical) anchor point of the message", true, true, 0, true, 1, true);
+	cvar_message_anchor_y.bindTo(message_anchor_y);
+	cvar_message_anchor_y.addOnValueChanged([this](std::string oldVal, CVarWrapper cvar) { DisplayExampleMessage(true); });
 
 	// Comma separated messages
 	cvarManager->registerCvar(CVAR_GOAL_MESSAGES, "Drink some water!,Check your posture!", "Comma separated messages to be displayed when a goal is scored", true, false, 0, false, 0, true)
@@ -129,11 +135,11 @@ void FriendlyReminders::Render(CanvasWrapper canvas)
 {
 	Vector2 canvasSize = canvas.GetSize();
 
-	float textScale = *cvar_message_scale * canvasSize.Y / 1080;
+	float textScale = *message_scale * canvasSize.Y / 1080;
 
-	Vector2F textPosition = { *cvar_message_position_x, *cvar_message_position_y };
+	Vector2F textPosition = { *message_position_x, *message_position_y };
 	Vector2F textSize = canvas.GetStringSize(currentMessage, textScale, textScale);
-	Vector2F anchorOffset = textSize * Vector2F{ *cvar_message_anchor_x, *cvar_message_anchor_y };
+	Vector2F anchorOffset = textSize * Vector2F{ *message_anchor_x, *message_anchor_y };
 
 	canvas.SetColor(LinearColor{ 255, 255, 255, 255 });
 	canvas.SetPosition(textPosition * canvasSize - anchorOffset);
@@ -230,8 +236,8 @@ void FriendlyReminders::HookMatchEnded()
 void FriendlyReminders::OnEvent(EventType eventType)
 {
 	// Return if event type is disabled
-	if (eventType == EventType::GoalScored && *cvar_show_goal_messages.get() == false) return;
-	if (eventType == EventType::GameFinished && *cvar_show_game_finished_messages.get() == false) return;
+	if (eventType == EventType::GoalScored && *show_goal_messages.get() == false) return;
+	if (eventType == EventType::GameFinished && *show_game_finished_messages.get() == false) return;
 
 	// Get next message for even type
 	std::string message = FriendlyReminders::GetNextMessage(eventType);
@@ -250,7 +256,7 @@ std::string FriendlyReminders::GetNextMessage(EventType eventType)
 	int displayMessageIndex = 0;
 
 	// Calculate maximum message index
-	if (*cvar_combine_messages.get() == true)
+	if (*combine_messages.get() == true)
 	{
 		maxIndex = goalMessagesLength + gameFinishedMessagesLength;
 
@@ -276,11 +282,11 @@ std::string FriendlyReminders::GetNextMessage(EventType eventType)
 	if (maxIndex == 0) return "";
 
 	// Determine next message index
-	if (*cvar_pick_message_method.get() == "Random")
+	if (*pick_message_method.get() == "Random")
 	{
 		displayMessageIndex = rand() % maxIndex;
 	}
-	else if (*cvar_pick_message_method.get() == "Indexed")
+	else if (*pick_message_method.get() == "Indexed")
 	{
 		if (*messageIndex >= maxIndex)
 		{
@@ -293,7 +299,7 @@ std::string FriendlyReminders::GetNextMessage(EventType eventType)
 	}
 
 	// Get message at message index
-	if (*cvar_combine_messages.get() == true)
+	if (*combine_messages.get() == true)
 	{
 		if (displayMessageIndex < goalMessagesLength)
 		{
@@ -320,13 +326,23 @@ std::string FriendlyReminders::GetNextMessage(EventType eventType)
 	return "";
 }
 
+// Method to display example message to user
+void FriendlyReminders::DisplayExampleMessage(bool visualChangeMade)
+{
+	if (!visualChangeMade || *display_message_method.get() == "Default")
+	{
+		std::string editMessage = "Example text!";
+		DisplayMessage(editMessage, 1);
+	}
+}
+
 // Method to display message to user
 void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 {
 	currentMessageIndex++;
 
 	// Check display method
-	if (*cvar_display_message_method.get() == "Default")
+	if (*display_message_method.get() == "Default")
 	{
 		currentMessage = message;
 
@@ -343,7 +359,7 @@ void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 			displayTime
 		);
 	}
-	else if (*cvar_display_message_method.get() == "Notification")
+	else if (*display_message_method.get() == "Notification")
 	{
 		// Get notifications enabled state
 		bool notificiationsEnabled = cvarManager->getCvar("cl_notifications_enabled_beta").getBoolValue();
@@ -363,7 +379,7 @@ void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 			cvarManager->executeCommand("cl_notifications_enabled_beta 0");
 		}
 	}
-	else if (*cvar_display_message_method.get() == "Chat")
+	else if (*display_message_method.get() == "Chat")
 	{
 		gameWrapper->LogToChatbox(message, "Friendly Reminder");
 	}
