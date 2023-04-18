@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "FriendlyReminders.h"
+#include "bakkesmod/wrappers/GuiManagerWrapper.h"
 
 // Initialise plugin
-BAKKESMOD_PLUGIN(FriendlyReminders, "Friendly Reminders", plugin_version, PLUGINTYPE_FREEPLAY)
+BAKKESMOD_PLUGIN(FriendlyReminders, PLUGIN_NAME.c_str(), plugin_version, PLUGINTYPE_FREEPLAY)
 
 std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 
@@ -149,6 +150,15 @@ void FriendlyReminders::onUnload()
 {
 	gameWrapper->UnregisterDrawables();
 	cvarManager->executeCommand("closemenu " + GetMenuName(), false);
+}
+
+// ImGui context initialisation
+void FriendlyReminders::SetImGuiContext(uintptr_t ctx)
+{
+	ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>(ctx));
+
+	GuiManagerWrapper guiManager = gameWrapper->GetGUIManager();
+	guiManager.LoadFont("Ubuntu-Bold-72", "Ubuntu-Bold.ttf", 72);
 }
 
 // Canvas interface rendering

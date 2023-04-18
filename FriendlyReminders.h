@@ -2,9 +2,14 @@
 
 #include "bakkesmod/plugin/bakkesmodplugin.h"
 #include "bakkesmod/plugin/pluginwindow.h"
+#include "bakkesmod/plugin/pluginsettingswindow.h"
 
 #include "version.h"
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD);
+
+// Plugin properties
+const std::string PLUGIN_NAME = "Friendly Reminders";
+const std::string PLUGIN_MENU_NAME = "friendlyreminders";
 
 // CVars declaration
 extern const std::string CVAR_SHOW_GOAL_MESSAGES;
@@ -31,7 +36,9 @@ enum class EventType
 	GameFinished
 };
 
-class FriendlyReminders: public BakkesMod::Plugin::BakkesModPlugin, public BakkesMod::Plugin::PluginWindow
+class FriendlyReminders: public BakkesMod::Plugin::BakkesModPlugin,
+	public BakkesMod::Plugin::PluginWindow,
+	public BakkesMod::Plugin::PluginSettingsWindow
 {
 	// BakkesModPlugin methods
 	virtual void onLoad();
@@ -85,16 +92,20 @@ private:
 	// Utility methods
 	void SplitString(std::string&, char, std::vector<std::string>&);
 
-	// ImGui interface rendering
+	// ImGui settings
 	ImFont* menuFont;
-	std::string menuName = "friendlyreminders";
+	void SetImGuiContext(uintptr_t ctx) override;
 
+	// ImGui overlay rendering
 	std::string GetMenuName() override;
 	std::string GetMenuTitle() override;
-	void SetImGuiContext(uintptr_t ctx) override;
 	bool ShouldBlockInput() override;
 	bool IsActiveOverlay() override;
 	void OnOpen() override;
 	void OnClose() override;
 	void Render() override;
+
+	// ImGui settings rendering
+	std::string GetPluginName() override;
+	void RenderSettings() override;
 };

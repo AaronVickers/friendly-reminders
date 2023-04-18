@@ -109,6 +109,7 @@
     </ClCompile>
     <ClCompile Include="FriendlyReminders.cpp" />
     <ClCompile Include="ReminderGui.cpp" />
+    <ClCompile Include="SettingsGui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h" />

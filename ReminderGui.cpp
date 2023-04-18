@@ -4,20 +4,12 @@
 
 std::string FriendlyReminders::GetMenuName()
 {
-	return menuName;
+	return PLUGIN_MENU_NAME;
 }
 
 std::string FriendlyReminders::GetMenuTitle()
 {
-	return menuName;
-}
-
-void FriendlyReminders::SetImGuiContext(uintptr_t ctx)
-{
-	ImGui::SetCurrentContext(reinterpret_cast<ImGuiContext*>(ctx));
-
-	GuiManagerWrapper guiManager = gameWrapper->GetGUIManager();
-	guiManager.LoadFont("Ubuntu-Bold-72", "Ubuntu-Bold.ttf", 72);
+	return PLUGIN_NAME;
 }
 
 bool FriendlyReminders::ShouldBlockInput()
@@ -60,7 +52,7 @@ void FriendlyReminders::Render()
 		displaySize.y * *message_position_y - textSize.y * *message_anchor_y
 	));
 
-	ImGui::Begin(menuName.c_str(), (bool*)1, windowFlags);
+	ImGui::Begin(PLUGIN_MENU_NAME.c_str(), (bool*)1, windowFlags);
 
 	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
 	ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 1.0f);
