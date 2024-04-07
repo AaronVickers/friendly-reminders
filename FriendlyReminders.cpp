@@ -131,6 +131,9 @@ void FriendlyReminders::onLoad()
 
 	gameWrapper->HookEventPost("Function TAGame.GFxShell_TA.LeaveMatch", std::bind(&FriendlyReminders::HookMatchEnded, this));
 
+	// Load toast notification texture
+	gameWrapper->LoadToastTexture("bell", gameWrapper->GetDataFolder() / "assets" / "bell.png");
+
 	// Render display on game load
 	gameWrapper->SetTimeout([this](...)
 		{
@@ -180,7 +183,7 @@ void FriendlyReminders::HookGoalScored()
 	if (gameWrapper->IsInFreeplay()) return;
 
 	// Ignore if not in game
-	if (!gameWrapper->IsInGame()) return;
+	if (!(gameWrapper->IsInOnlineGame() or gameWrapper->IsInGame())) return;
 
 	// Ignore if in replay
 	if (gameWrapper->IsInReplay()) return;
@@ -418,7 +421,7 @@ void FriendlyReminders::DisplayMessage(std::string& message, float displayTime)
 		}
 
 		// Display notification
-		gameWrapper->Toast("Friendly Reminder", message, "default", displayTime);
+		gameWrapper->Toast("Friendly Reminder", message, "bell", displayTime);
 
 		// Restore notifications enabled state
 		if (!notificiationsEnabled)
