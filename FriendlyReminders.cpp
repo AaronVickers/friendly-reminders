@@ -183,7 +183,7 @@ void FriendlyReminders::HookGoalScored()
 	if (gameWrapper->IsInFreeplay()) return;
 
 	// Ignore if not in game
-	if (!gameWrapper->IsInGame()) return;
+	if (!(gameWrapper->IsInOnlineGame() or gameWrapper->IsInGame())) return;
 
 	// Ignore if in replay
 	if (gameWrapper->IsInReplay()) return;
